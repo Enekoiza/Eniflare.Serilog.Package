@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
 
     steps:
       - name: Checkout
@@ -38,21 +37,20 @@ jobs:
       - name: Pack
         run: dotnet pack src/Eniflare.Serilog/Eniflare.Serilog.csproj -c Release --no-build -o artifacts
 
-      # --- Publish to GitHub Packages (Enekoiza org) ---
-      - name: Push to GitHub Packages
+      # --- Publish to NuGet.org (requires a NUGET_API_KEY repo secret) ---
+      # The .snupkg symbol package is pushed automatically alongside the .nupkg
+      # when both sit in the same folder, so a single push covers symbols too.
+      - name: Push to NuGet.org
         run: |
-          dotnet nuget add source --username Enekoiza --password "${{ secrets.GITHUB_TOKEN }}" \
-            --store-password-in-clear-text --name github \
-            "https://nuget.pkg.github.com/Enekoiza/index.json"
-          dotnet nuget push "artifacts/*.nupkg" --source github --api-key "${{ secrets.GITHUB_TOKEN }}" --skip-duplicate
-          dotnet nuget push "artifacts/*.snupkg" --source github --api-key "${{ secrets.GITHUB_TOKEN }}" --skip-duplicate
+          dotnet nuget push "artifacts/*.nupkg" \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key "${{ secrets.NUGET_API_KEY }}" --skip-duplicate
 
-      # --- To publish to NuGet.org instead, add a NUGET_API_KEY repo secret and use: ---
-      # - name: Push to NuGet.org
+      # --- To publish to GitHub Packages (Enekoiza org) instead, use: ---
+      # - name: Push to GitHub Packages
       #   run: |
-      #     dotnet nuget push "artifacts/*.nupkg" \
-      #       --source https://api.nuget.org/v3/index.json \
-      #       --api-key "${{ secrets.NUGET_API_KEY }}" --skip-duplicate
-      #     dotnet nuget push "artifacts/*.snupkg" \
-      #       --source https://api.nuget.org/v3/index.json \
-      #       --api-key "${{ secrets.NUGET_API_KEY }}" --skip-duplicate
+      #     dotnet nuget add source --username Enekoiza --password "${{ secrets.GITHUB_TOKEN }}" \
+      #       --store-password-in-clear-text --name github \
+      #       "https://nuget.pkg.github.com/Enekoiza/index.json"
+      #     dotnet nuget push "artifacts/*.nupkg" --source github --api-key "${{ secrets.GITHUB_TOKEN }}" --skip-duplicate
+      #     dotnet nuget push "artifacts/*.snupkg" --source github --api-key "${{ secrets.GITHUB_TOKEN }}" --skip-duplicate

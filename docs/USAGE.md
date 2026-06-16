@@ -3,118 +3,36 @@
 Esta guía explica, paso a paso, **qué tiene que hacer un usuario** para instalar y usar el
 paquete `Eniflare.Serilog` en su propia aplicación .NET.
 
-El paquete se publica en **GitHub Packages** de la organización
-[`Enekoiza`](https://github.com/orgs/Enekoiza/packages), no en NuGet.org. Eso implica un
-paso extra de **autenticación** que no existe con paquetes públicos de NuGet.org.
+El paquete se publica en **[NuGet.org](https://www.nuget.org/packages/Eniflare.Serilog)**,
+el repositorio público oficial de .NET. Eso significa que **se instala sin autenticación**:
+basta con `dotnet add package`.
 
 ---
 
 ## Índice
 
 1. [Requisitos](#1-requisitos)
-2. [Autenticarse con GitHub Packages](#2-autenticarse-con-github-packages)
-3. [Añadir la fuente de paquetes](#3-añadir-la-fuente-de-paquetes)
-4. [Instalar el paquete](#4-instalar-el-paquete)
-5. [Configurar el logger](#5-configurar-el-logger)
+2. [Instalar el paquete](#2-instalar-el-paquete)
+3. [Configurar el logger](#3-configurar-el-logger)
    - [Opción A — por código](#opción-a--por-código)
    - [Opción B — vía appsettings.json](#opción-b--vía-appsettingsjson)
-6. [Opciones disponibles](#6-opciones-disponibles)
-7. [Comprobar que funciona](#7-comprobar-que-funciona)
-8. [Solución de problemas](#8-solución-de-problemas)
+4. [Opciones disponibles](#4-opciones-disponibles)
+5. [Comprobar que funciona](#5-comprobar-que-funciona)
+6. [Solución de problemas](#6-solución-de-problemas)
 
 ---
 
 ## 1. Requisitos
 
 - **.NET SDK 8.0, 9.0 o 10.0** (el paquete soporta los tres _target frameworks_).
-- Una **cuenta de GitHub** con acceso a la organización `Enekoiza` (al menos permiso de
-  lectura sobre los packages de la org).
 - Tu **URL de Eniflare** (por ejemplo `https://eniflare.example.com`) y una **API key**
   (algo como `enf_xxx`).
 
----
-
-## 2. Autenticarse con GitHub Packages
-
-GitHub Packages **requiere autenticación incluso para descargar** (a diferencia de
-NuGet.org). Necesitas un **Personal Access Token (classic)** con el scope `read:packages`.
-
-1. Ve a **GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)**:
-   https://github.com/settings/tokens
-2. **Generate new token (classic)**.
-3. Marca el scope:
-   - ✅ `read:packages` — para **instalar** paquetes (suficiente para consumir).
-   - (Solo si además vas a **publicar** paquetes a mano necesitarías `write:packages`.)
-4. Genera el token y **cópialo** (no se vuelve a mostrar).
-
-> ⚠️ **Trata el token como una contraseña.** No lo subas a ningún repositorio. Más abajo
-> se explica cómo mantenerlo fuera del control de versiones.
+No necesitas cuenta de GitHub ni token: al estar en NuGet.org, la instalación es pública.
 
 ---
 
-## 3. Añadir la fuente de paquetes
-
-Tienes dos formas. La recomendada es un archivo `nuget.config` **por proyecto/solución**.
-
-### Forma recomendada — `nuget.config` (sin secreto en el archivo)
-
-Crea un `nuget.config` en la raíz de tu solución (junto al `.sln`):
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <packageSources>
-    <add key="github-enekoiza"
-         value="https://nuget.pkg.github.com/Enekoiza/index.json" />
-  </packageSources>
-  <packageSourceCredentials>
-    <github-enekoiza>
-      <add key="Username" value="%GITHUB_USERNAME%" />
-      <add key="ClearTextPassword" value="%GITHUB_TOKEN%" />
-    </github-enekoiza>
-  </packageSourceCredentials>
-</configuration>
-```
-
-Las credenciales se leen de **variables de entorno**, así que el token **no** queda escrito
-en el archivo y puedes subir este `nuget.config` al repo sin riesgo.
-
-Define las variables en tu máquina antes de restaurar:
-
-**PowerShell (Windows):**
-```powershell
-$env:GITHUB_USERNAME = "tu-usuario-github"
-$env:GITHUB_TOKEN    = "ghp_tuTokenAqui"
-```
-
-**bash / zsh (Linux/macOS):**
-```bash
-export GITHUB_USERNAME="tu-usuario-github"
-export GITHUB_TOKEN="ghp_tuTokenAqui"
-```
-
-> Si prefieres no usar variables, puedes poner el token directamente en
-> `ClearTextPassword`, pero entonces **añade `nuget.config` a tu `.gitignore`** para no
-> filtrarlo.
-
-### Forma alternativa — `dotnet nuget add source` (global)
-
-Registra la fuente una sola vez en tu máquina (el token se guarda en la config global de
-NuGet de tu usuario):
-
-```bash
-dotnet nuget add source "https://nuget.pkg.github.com/Enekoiza/index.json" \
-  --name github-enekoiza \
-  --username tu-usuario-github \
-  --password ghp_tuTokenAqui \
-  --store-password-in-clear-text
-```
-
----
-
-## 4. Instalar el paquete
-
-Con la fuente y las credenciales listas:
+## 2. Instalar el paquete
 
 ```bash
 dotnet add package Eniflare.Serilog
@@ -141,7 +59,7 @@ dotnet add package Serilog.Settings.Configuration
 
 ---
 
-## 5. Configurar el logger
+## 3. Configurar el logger
 
 ### Opción A — por código
 
@@ -233,7 +151,7 @@ app.Run();
 
 ---
 
-## 6. Opciones disponibles
+## 4. Opciones disponibles
 
 | Parámetro                  | Por defecto         | Descripción                                                   |
 |----------------------------|---------------------|---------------------------------------------------------------|
@@ -257,7 +175,7 @@ Ejemplo afinando el batching:
 
 ---
 
-## 7. Comprobar que funciona
+## 5. Comprobar que funciona
 
 ```csharp
 Log.Information("Usuario {UserId} ha iniciado sesión", 42);
@@ -273,18 +191,13 @@ Log.CloseAndFlush();
 
 ---
 
-## 8. Solución de problemas
-
-**`error NU1301: Unable to load the service index` o `401 Unauthorized` al restaurar**
-- Falta autenticación o el token no tiene `read:packages`. Revisa el paso
-  [2](#2-autenticarse-con-github-packages) y que `GITHUB_USERNAME` / `GITHUB_TOKEN` estén
-  definidos en la terminal donde ejecutas `dotnet restore`.
+## 6. Solución de problemas
 
 **`Unable to find package Eniflare.Serilog`**
-- La fuente `github-enekoiza` no está registrada o apunta mal. Comprueba con:
-  ```bash
-  dotnet nuget list source
-  ```
+- Comprueba que tienes conexión a NuGet.org y que el nombre/versión son correctos. Lista
+  tus fuentes con `dotnet nuget list source` y asegúrate de que `nuget.org` está habilitada.
+- Si acabas de publicar una versión, puede tardar unos minutos en estar indexada y
+  disponible para instalar.
 
 **Los logs no aparecen en Eniflare**
 - Asegúrate de llamar a `Log.CloseAndFlush()` antes de que el proceso termine (en apps de
@@ -292,7 +205,23 @@ Log.CloseAndFlush();
 - Verifica que `baseUrl` es la raíz correcta (sin `/ingest`, se añade solo) y que la
   `apiKey` es válida.
 
-**Quiero migrar a NuGet.org en el futuro**
-- El repositorio incluye en `.github/workflows/release.yml` un bloque comentado para
-  publicar en NuGet.org usando un secret `NUGET_API_KEY`. Los consumidores ya no
-  necesitarían autenticarse para instalar.
+---
+
+## Para mantenedores — cómo publicar una versión
+
+El versionado lo gestiona [MinVer](https://github.com/adamralph/minver) a partir de tags
+git. Para lanzar una versión a NuGet.org:
+
+1. Asegúrate de que el secret `NUGET_API_KEY` existe en el repo
+   (**Settings → Secrets and variables → Actions**), con una API key de NuGet.org con
+   permiso de _Push_.
+2. Crea y sube el tag:
+   ```bash
+   git tag v1.2.3
+   git push origin v1.2.3
+   ```
+3. El workflow [`release.yml`](../.github/workflows/release.yml) construye, prueba,
+   empaqueta y publica el `.nupkg` (y el `.snupkg` de símbolos) en NuGet.org.
+
+> Recuerda: en NuGet.org una versión publicada **no se puede borrar ni sobrescribir**
+> (solo _unlist_). Para corregir algo, publica una versión superior.
