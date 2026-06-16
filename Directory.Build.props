@@ -1,0 +1,33 @@
+<Project>
+
+  <PropertyGroup>
+    <LangVersion>13</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <!-- Shared package metadata -->
+  <PropertyGroup>
+    <Authors>Enekoiza</Authors>
+    <Company>Enekoiza</Company>
+    <Copyright>Copyright © Enekoiza</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Enekoiza/Eniflare.Serilog.Package</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Enekoiza/Eniflare.Serilog.Package</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
+
+  <!-- Deterministic / CI build hardening -->
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <!-- Versioning from git tags (vX.Y.Z) -->
+  <PropertyGroup>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+  </PropertyGroup>
+
+</Project>
