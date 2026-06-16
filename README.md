@@ -17,6 +17,9 @@ This package contains **only the sink**. Your application provides `Serilog.AspN
 dotnet add package Eniflare.Serilog
 ```
 
+> 📖 The package is published to **GitHub Packages**, which requires authentication to
+> install. See the full step-by-step guide in [docs/USAGE.md](docs/USAGE.md).
+
 ## Usage
 
 ### Configure in code
