@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write # required for NuGet.org Trusted Publishing (OIDC)
 
     steps:
       - name: Checkout
@@ -37,14 +38,22 @@ jobs:
       - name: Pack
         run: dotnet pack src/Eniflare.Serilog/Eniflare.Serilog.csproj -c Release --no-build -o artifacts
 
-      # --- Publish to NuGet.org (requires a NUGET_API_KEY repo secret) ---
-      # The .snupkg symbol package is pushed automatically alongside the .nupkg
-      # when both sit in the same folder, so a single push covers symbols too.
+      # --- Publish to NuGet.org via Trusted Publishing (OIDC, no stored secret) ---
+      # Requires a Trusted Publisher policy on NuGet.org pointing at this repo and
+      # workflow. NuGet/login exchanges the GitHub OIDC token for a short-lived API key.
+      # The .snupkg symbol package is pushed automatically alongside the .nupkg when
+      # both sit in the same folder, so a single push covers symbols too.
+      - name: NuGet login (Trusted Publishing)
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+
       - name: Push to NuGet.org
         run: |
           dotnet nuget push "artifacts/*.nupkg" \
             --source https://api.nuget.org/v3/index.json \
-            --api-key "${{ secrets.NUGET_API_KEY }}" --skip-duplicate
+            --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" --skip-duplicate
 
       # --- To publish to GitHub Packages (Enekoiza org) instead, use: ---
       # - name: Push to GitHub Packages

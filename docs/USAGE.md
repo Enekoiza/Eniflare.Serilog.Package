@@ -210,18 +210,31 @@ Log.CloseAndFlush();
 ## Para mantenedores — cómo publicar una versión
 
 El versionado lo gestiona [MinVer](https://github.com/adamralph/minver) a partir de tags
-git. Para lanzar una versión a NuGet.org:
+git. La publicación usa **Trusted Publishing** (OIDC), el método recomendado por NuGet.org:
+no hay ninguna API key almacenada como secret; el workflow obtiene una key temporal en
+cada ejecución.
 
-1. Asegúrate de que el secret `NUGET_API_KEY` existe en el repo
-   (**Settings → Secrets and variables → Actions**), con una API key de NuGet.org con
-   permiso de _Push_.
-2. Crea y sube el tag:
-   ```bash
-   git tag v1.2.3
-   git push origin v1.2.3
-   ```
-3. El workflow [`release.yml`](../.github/workflows/release.yml) construye, prueba,
-   empaqueta y publica el `.nupkg` (y el `.snupkg` de símbolos) en NuGet.org.
+**Configuración única (una sola vez):**
+
+1. En NuGet.org → **Account → Trusted Publishing** (https://www.nuget.org/account/trustedpublishing),
+   crea una política con:
+   - **Repository owner**: `Enekoiza`
+   - **Repository**: `Eniflare.Serilog.Package`
+   - **Workflow file**: `release.yml`
+   - (Opcional) un *environment* si lo configuras en el workflow.
+2. En el repo de GitHub → **Settings → Secrets and variables → Actions → Variables**,
+   crea una variable `NUGET_USER` con tu nombre de usuario de NuGet.org (el dueño del
+   paquete). No es un secreto, es una variable normal.
+
+**Para lanzar cada versión:**
+
+```bash
+git tag v1.2.3
+git push origin v1.2.3
+```
+
+El workflow [`release.yml`](../.github/workflows/release.yml) construye, prueba, empaqueta
+y publica el `.nupkg` (y el `.snupkg` de símbolos) en NuGet.org mediante OIDC.
 
 > Recuerda: en NuGet.org una versión publicada **no se puede borrar ni sobrescribir**
 > (solo _unlist_). Para corregir algo, publica una versión superior.
