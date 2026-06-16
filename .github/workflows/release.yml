@@ -1,0 +1,58 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history + tags so MinVer can compute the version
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build -c Release --no-restore
+
+      - name: Test
+        run: dotnet test -c Release --no-build --verbosity normal
+
+      - name: Pack
+        run: dotnet pack src/Eniflare.Serilog/Eniflare.Serilog.csproj -c Release --no-build -o artifacts
+
+      # --- Publish to GitHub Packages (Enekoiza org) ---
+      - name: Push to GitHub Packages
+        run: |
+          dotnet nuget add source --username Enekoiza --password "${{ secrets.GITHUB_TOKEN }}" \
+            --store-password-in-clear-text --name github \
+            "https://nuget.pkg.github.com/Enekoiza/index.json"
+          dotnet nuget push "artifacts/*.nupkg" --source github --api-key "${{ secrets.GITHUB_TOKEN }}" --skip-duplicate
+          dotnet nuget push "artifacts/*.snupkg" --source github --api-key "${{ secrets.GITHUB_TOKEN }}" --skip-duplicate
+
+      # --- To publish to NuGet.org instead, add a NUGET_API_KEY repo secret and use: ---
+      # - name: Push to NuGet.org
+      #   run: |
+      #     dotnet nuget push "artifacts/*.nupkg" \
+      #       --source https://api.nuget.org/v3/index.json \
+      #       --api-key "${{ secrets.NUGET_API_KEY }}" --skip-duplicate
+      #     dotnet nuget push "artifacts/*.snupkg" \
+      #       --source https://api.nuget.org/v3/index.json \
+      #       --api-key "${{ secrets.NUGET_API_KEY }}" --skip-duplicate
