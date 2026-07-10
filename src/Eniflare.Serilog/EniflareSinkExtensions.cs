@@ -79,7 +79,7 @@ public static class EniflareSinkExtensions
             logEventLimitBytes: logEventLimitBytes,
             logEventsInBatchLimit: batchSizeLimit,
             period: period,
-            textFormatter: new CompactJsonFormatter(),
+            textFormatter: new RenderedCompactJsonFormatter(),
             restrictedToMinimumLevel: restrictedToMinimumLevel,
             httpClient: new EniflareHttpClient(apiKey));
     }

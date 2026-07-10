@@ -3,7 +3,7 @@
 A [Serilog](https://serilog.net/) sink that ships your application's log events to
 [Eniflare](https://github.com/Enekoiza/Eniflare.Serilog.Package) in the background.
 
-- Posts batches to `POST {baseUrl}/ingest` using the **CLEF** format (`CompactJsonFormatter`).
+- Posts batches to `POST {baseUrl}/ingest` using the **CLEF** format (`RenderedCompactJsonFormatter`, so events carry the rendered `@m` message).
 - Authenticates with your API key via the `X-Api-Key` request header.
 - Batching, buffering and retries are handled by `Serilog.Sinks.Http` — logging never blocks your app.
 - Targets `net8.0`, `net9.0` and `net10.0`.

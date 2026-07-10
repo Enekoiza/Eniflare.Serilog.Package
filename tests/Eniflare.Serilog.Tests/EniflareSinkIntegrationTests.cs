@@ -80,8 +80,8 @@ public class EniflareSinkIntegrationTests
         foreach (var evt in doc.RootElement.EnumerateArray())
         {
             Assert.True(evt.TryGetProperty("@t", out _), "CLEF event must have @t");
-            var hasMessage = evt.TryGetProperty("@mt", out _) || evt.TryGetProperty("@m", out _);
-            Assert.True(hasMessage, "CLEF event must have @mt or @m");
+            // RenderedCompactJsonFormatter emits the rendered message as @m.
+            Assert.True(evt.TryGetProperty("@m", out _), "CLEF event must have rendered @m");
         }
     }
 }
